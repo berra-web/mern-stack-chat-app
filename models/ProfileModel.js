@@ -1,4 +1,3 @@
-// Model för users Profil Sidan
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 

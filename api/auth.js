@@ -1,13 +1,13 @@
-const express = require("express"); // skapar Function för inlogningen genom att kalla Express router
+const express = require("express");
 const router = express.Router();
-const UserModel = require("../models/UserModel"); // Kallar users Model
+const UserModel = require("../models/UserModel");
 const FollowerModel = require("../models/FollowerModel");
-const jwt = require("jsonwebtoken"); // genom denna vi implementerar logiken bakom att skicka JSON Web Tokens från servern till en klient
-const bcrypt = require("bcryptjs"); // kallar bcrypt för random Lösenord
-const isEmail = require("validator/lib/isEmail"); // Email validation
-const authMiddleware = require("../middleware/authMiddleware"); // Kallar authMiddleware för Athentication
+const NotificationModel = require("../models/NotificationModel");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
+const isEmail = require("validator/lib/isEmail");
+const authMiddleware = require("../middleware/authMiddleware");
 
-// Inlogning genom authMiddleware
 router.get("/", authMiddleware, async (req, res) => {
   const { userId } = req;
 
@@ -22,7 +22,7 @@ router.get("/", authMiddleware, async (req, res) => {
     return res.status(500).send(`Server error`);
   }
 });
-// vi Kör function post så att logga in om user är samma user som har registerat sig
+
 router.post("/", async (req, res) => {
   const { email, password } = req.body.user;
 
@@ -44,6 +44,12 @@ router.post("/", async (req, res) => {
     const isPassword = await bcrypt.compare(password, user.password);
     if (!isPassword) {
       return res.status(401).send("Invalid Credentials");
+    }
+
+    const notificationModel = await NotificationModel.findOne({ user: user._id });
+
+    if (!notificationModel) {
+      await new NotificationModel({ user: user._id, notifications: [] }).save();
     }
 
     const payload = { userId: user._id };

@@ -1,4 +1,3 @@
-// Models för users Followers 
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
